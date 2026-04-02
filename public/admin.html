@@ -148,6 +148,24 @@
     </div>
 
     <script>
+      // Password protection
+      const PASSWORD = "vcs2026admin"; // change this to whatever you want
+
+      window.onload = function () {
+        const entered = sessionStorage.getItem("adminAuth");
+        if (entered !== PASSWORD) {
+          const attempt = prompt("Enter admin password:");
+          if (attempt !== PASSWORD) {
+            alert("Wrong password. Access denied.");
+            window.location.href = "/";
+            return;
+          }
+          sessionStorage.setItem("adminAuth", PASSWORD);
+        }
+        // load teachers on auth success
+        loadTeachers("");
+      };
+
       const API_BASE_URL = "/api";
 
       function loadTeachers(vcsYear) {
