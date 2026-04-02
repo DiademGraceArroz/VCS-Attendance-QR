@@ -4,7 +4,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
-const QRCode = require("qrcode");
 
 // Middleware
 app.use(cors());
@@ -186,14 +185,4 @@ app.get("/api/attendance/:date", async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});
-
-// Generate QR code for a student
-app.get("/api/generate-qr/:id", async (req, res) => {
-  try {
-    const qrImage = await QRCode.toDataURL(req.params.id);
-    res.json({ qr: qrImage, id: req.params.id });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 });
