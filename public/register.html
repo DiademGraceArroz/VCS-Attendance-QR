@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCS — New Student Registration</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📝 New Student Registration</h1>
+        <p>Vacation Church School Student Management System</p>
+      </div>
+
+      <div class="content">
+        <!-- Status Messages -->
+        <div id="statusMessage" class="status-message"></div>
+
+        <!-- Loading Spinner -->
+        <div class="spinner" id="spinner"></div>
+
+        <!-- Registration Form -->
+        <div class="form-section active" id="registrationForm">
+          <p class="student-id-display">
+            Student ID: <strong id="newStudentId">Loading...</strong>
+          </p>
+
+          <form id="studentForm" onsubmit="registerStudent(event)">
+            <div class="form-group">
+              <label for="fullName">Full Name *</label>
+              <input
+                type="text"
+                id="fullName"
+                required
+                placeholder="Enter full name"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="age">Age *</label>
+                <input
+                  type="number"
+                  id="age"
+                  required
+                  min="3"
+                  max="25"
+                  placeholder="Age"
+                />
+              </div>
+              <div class="form-group">
+                <label for="gender">Gender *</label>
+                <select id="gender" required>
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="grade">Grade/Class *</label>
+              <input
+                type="text"
+                id="grade"
+                required
+                placeholder="e.g., Grade 5, Primary 3"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="address">Address</label>
+              <input type="text" id="address" placeholder="Enter address" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="church">Church/Outreach *</label>
+                <input
+                  type="text"
+                  id="church"
+                  required
+                  placeholder="Church name or Outreach location"
+                />
+              </div>
+              <div class="form-group">
+                <label for="vcsYear">VCS Year *</label>
+                <input
+                  type="text"
+                  id="vcsYear"
+                  required
+                  placeholder="e.g., 2025"
+                />
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              ✅ Register Student
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="window.location.href = '/'"
+            >
+              ← Back to Scanner
+            </button>
+          </form>
+        </div>
+
+        <!-- Success State (shown after registration) -->
+        <div class="student-profile" id="successProfile">
+          <div class="profile-header">
+            <h2 id="successName">Student Name</h2>
+            <span class="attendance-badge">✓ Registered & Present</span>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Student ID</div>
+              <div class="info-value" id="successId">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Grade</div>
+              <div class="info-value" id="successGrade">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Church/Outreach</div>
+              <div class="info-value" id="successChurch">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">VCS Year</div>
+              <div class="info-value" id="successYear">-</div>
+            </div>
+          </div>
+
+          <p style="text-align: center; color: #666; margin: 20px 0">
+            Student has been registered and attendance marked for today! 🎉
+          </p>
+
+          <button class="btn btn-success" onclick="window.location.href = '/'">
+            🔄 Scan Another Student
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="register.js"></script>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-// Configuration — /api works on both localhost and Render
+// Configuration
 const API_BASE_URL = "/api";
 
 // State
@@ -29,8 +29,6 @@ function initScanner() {
 
 function onScanSuccess(decodedText, decodedResult) {
   if (!isScanning) return;
-
-  console.log(`QR Code detected: ${decodedText}`);
 
   html5QrCode.pause();
   isScanning = false;
@@ -72,11 +70,13 @@ function lookupStudent(studentId) {
         showStatus("Student found! Recording attendance...", "success");
         markAttendance();
       } else {
-        showRegistrationForm(studentId);
         showStatus(
-          "New student detected. Please complete registration.",
+          "New student detected. Redirecting to registration...",
           "info",
         );
+        setTimeout(() => {
+          window.location.href = `/register.html?id=${encodeURIComponent(studentId)}`;
+        }, 800);
       }
     })
     .catch((error) => {
@@ -95,14 +95,8 @@ function lookupManualId() {
   processQrCode(id);
 }
 
-function showRegistrationForm(studentId) {
-  hideAllSections();
-  document.getElementById("newStudentId").textContent = studentId;
-  document.getElementById("registrationForm").classList.add("active");
-}
-
 function showStudentProfile(student) {
-  hideAllSections();
+  document.getElementById("studentProfile").classList.add("active");
 
   document.getElementById("profileName").textContent = student.fullName;
   document.getElementById("profileId").textContent = student.studentId;
@@ -112,7 +106,6 @@ function showStudentProfile(student) {
   document.getElementById("profileChurch").textContent = student.church;
   document.getElementById("profileYear").textContent = student.vcsYear;
 
-  // Attendance history
   const attendanceList = document.getElementById("attendanceList");
   attendanceList.innerHTML = "";
 
@@ -128,7 +121,6 @@ function showStudentProfile(student) {
       '<p style="color: #999;">No attendance records yet</p>';
   }
 
-  // Reset then set active tags
   document
     .querySelectorAll(".tag")
     .forEach((tag) => tag.classList.remove("active"));
@@ -139,7 +131,6 @@ function showStudentProfile(student) {
     });
   }
 
-  // Attendance badge
   const today = new Date().toISOString().split("T")[0];
   const isPresentToday =
     student.attendance &&
@@ -155,51 +146,6 @@ function showStudentProfile(student) {
     badge.textContent = "Not Checked In";
     badge.classList.add("absent");
   }
-
-  document.getElementById("studentProfile").classList.add("active");
-}
-
-function registerStudent(event) {
-  event.preventDefault();
-  showSpinner(true);
-
-  const studentData = {
-    studentId: currentStudentId,
-    fullName: document.getElementById("fullName").value,
-    age: parseInt(document.getElementById("age").value),
-    gender: document.getElementById("gender").value,
-    grade: document.getElementById("grade").value,
-    address: document.getElementById("address").value,
-    church: document.getElementById("church").value,
-    vcsYear: document.getElementById("vcsYear").value,
-    attendance: [new Date().toISOString()],
-    tags: [],
-  };
-
-  fetch(`${API_BASE_URL}/students`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(studentData),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      showSpinner(false);
-      if (data.error) {
-        showStatus("Error: " + data.error, "error");
-        return;
-      }
-      showStatus(
-        "Student registered successfully! Attendance marked for today.",
-        "success",
-      );
-      currentStudentData = data.student || studentData;
-      showStudentProfile(currentStudentData);
-    })
-    .catch((error) => {
-      showSpinner(false);
-      showStatus("Error registering student. Please try again.", "error");
-      console.error("Error:", error);
-    });
 }
 
 function markAttendance() {
@@ -270,7 +216,7 @@ function toggleTag(tagName) {
 }
 
 function resetScanner() {
-  hideAllSections();
+  document.getElementById("studentProfile").classList.remove("active");
   document.getElementById("scanResult").classList.remove("active");
   document.getElementById("scannerSection").style.display = "block";
   document.getElementById("manualStudentId").value = "";
@@ -283,11 +229,6 @@ function resetScanner() {
 
   currentStudentId = null;
   currentStudentData = null;
-}
-
-function hideAllSections() {
-  document.getElementById("registrationForm").classList.remove("active");
-  document.getElementById("studentProfile").classList.remove("active");
 }
 
 function toggleManualEntry() {
@@ -308,12 +249,10 @@ function showStatus(message, type) {
   }, 5000);
 }
 
-// Initialize on load
 window.onload = function () {
   initScanner();
 };
 
-// Cleanup on page unload
 window.onbeforeunload = function () {
   if (html5QrCode) {
     html5QrCode.stop().catch(console.error);
