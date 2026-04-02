@@ -1,5 +1,4 @@
 require("dotenv").config();
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -181,7 +180,7 @@ app.get("/api/attendance/:date", async (req, res) => {
 });
 
 // Fallback — serve index.html for any unknown route
-app.get("*", (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
