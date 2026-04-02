@@ -1,5 +1,5 @@
-// Configuration
-const API_BASE_URL = "http://localhost:3000/api"; // Change this to your backend URL
+// Configuration — /api works on both localhost and Render
+const API_BASE_URL = "/api";
 
 // State
 let html5QrCode;
@@ -28,42 +28,35 @@ function initScanner() {
 }
 
 function onScanSuccess(decodedText, decodedResult) {
-  // Prevent multiple scans
   if (!isScanning) return;
 
   console.log(`QR Code detected: ${decodedText}`);
 
-  // Stop scanning temporarily
   html5QrCode.pause();
   isScanning = false;
 
-  // Display result
   document.getElementById("qrContent").textContent = decodedText;
   document.getElementById("scanResult").classList.add("active");
 
-  // Process the QR code
   processQrCode(decodedText);
 }
 
 function onScanFailure(error) {
-  // console.warn(`QR scan error: ${error}`);
+  // suppress scan errors
 }
 
 function processQrCode(qrData) {
   showSpinner(true);
 
-  // Extract student ID from QR code
   let studentId = qrData.trim();
 
-  // If QR contains URL, extract ID
+  // If QR contains a URL, extract just the ID at the end
   if (studentId.includes("/")) {
     const parts = studentId.split("/");
     studentId = parts[parts.length - 1];
   }
 
   currentStudentId = studentId;
-
-  // Check if student exists
   lookupStudent(studentId);
 }
 
@@ -74,15 +67,11 @@ function lookupStudent(studentId) {
       showSpinner(false);
 
       if (data.exists) {
-        // Existing student - show profile
         currentStudentData = data.student;
         showStudentProfile(currentStudentData);
         showStatus("Student found! Recording attendance...", "success");
-
-        // Auto-mark attendance for today
         markAttendance();
       } else {
-        // New student - show registration form
         showRegistrationForm(studentId);
         showStatus(
           "New student detected. Please complete registration.",
@@ -94,8 +83,6 @@ function lookupStudent(studentId) {
       showSpinner(false);
       showStatus("Error connecting to server. Please try again.", "error");
       console.error("Error:", error);
-      // For demo purposes, show registration form
-      showRegistrationForm(studentId);
     });
 }
 
@@ -117,7 +104,6 @@ function showRegistrationForm(studentId) {
 function showStudentProfile(student) {
   hideAllSections();
 
-  // Populate profile
   document.getElementById("profileName").textContent = student.fullName;
   document.getElementById("profileId").textContent = student.studentId;
   document.getElementById("profileAge").textContent = student.age;
@@ -126,7 +112,7 @@ function showStudentProfile(student) {
   document.getElementById("profileChurch").textContent = student.church;
   document.getElementById("profileYear").textContent = student.vcsYear;
 
-  // Show attendance history
+  // Attendance history
   const attendanceList = document.getElementById("attendanceList");
   attendanceList.innerHTML = "";
 
@@ -142,11 +128,10 @@ function showStudentProfile(student) {
       '<p style="color: #999;">No attendance records yet</p>';
   }
 
-  // Set active tags
-  document.querySelectorAll(".tag").forEach((tag) => {
-    tag.classList.remove("active");
-  });
-
+  // Reset then set active tags
+  document
+    .querySelectorAll(".tag")
+    .forEach((tag) => tag.classList.remove("active"));
   if (student.tags) {
     student.tags.forEach((tag) => {
       const tagElement = document.querySelector(`.tag.${tag}`);
@@ -154,11 +139,13 @@ function showStudentProfile(student) {
     });
   }
 
-  // Check if already marked present today
+  // Attendance badge
   const today = new Date().toISOString().split("T")[0];
   const isPresentToday =
     student.attendance &&
-    student.attendance.some((date) => date.startsWith(today));
+    student.attendance.some((date) =>
+      new Date(date).toISOString().startsWith(today),
+    );
 
   const badge = document.getElementById("attendanceBadge");
   if (isPresentToday) {
@@ -197,19 +184,21 @@ function registerStudent(event) {
     .then((response) => response.json())
     .then((data) => {
       showSpinner(false);
+      if (data.error) {
+        showStatus("Error: " + data.error, "error");
+        return;
+      }
       showStatus(
         "Student registered successfully! Attendance marked for today.",
         "success",
       );
-      showStudentProfile(studentData);
+      currentStudentData = data.student || studentData;
+      showStudentProfile(currentStudentData);
     })
     .catch((error) => {
       showSpinner(false);
-      showStatus(
-        "Student registered! (Demo mode - no backend connected)",
-        "success",
-      );
-      showStudentProfile(studentData);
+      showStatus("Error registering student. Please try again.", "error");
+      console.error("Error:", error);
     });
 }
 
@@ -226,27 +215,29 @@ function markAttendance() {
     .then((response) => response.json())
     .then((data) => {
       showSpinner(false);
-      showStatus("Attendance marked successfully for today!", "success");
 
-      // Update UI
+      if (data.alreadyMarked) {
+        showStatus("Already marked present today!", "info");
+      } else {
+        showStatus("Attendance marked successfully for today!", "success");
+      }
+
       const badge = document.getElementById("attendanceBadge");
       badge.textContent = "✓ Present Today";
       badge.classList.remove("absent");
 
-      // Refresh attendance list
       if (currentStudentData) {
         if (!currentStudentData.attendance) currentStudentData.attendance = [];
-        currentStudentData.attendance.push(new Date().toISOString());
+        if (!data.alreadyMarked) {
+          currentStudentData.attendance.push(new Date().toISOString());
+        }
         showStudentProfile(currentStudentData);
       }
     })
     .catch((error) => {
       showSpinner(false);
-      showStatus("Attendance marked! (Demo mode)", "success");
-
-      const badge = document.getElementById("attendanceBadge");
-      badge.textContent = "✓ Present Today";
-      badge.classList.remove("absent");
+      showStatus("Error marking attendance. Please try again.", "error");
+      console.error("Error:", error);
     });
 }
 
@@ -254,10 +245,8 @@ function toggleTag(tagName) {
   const tagElement = document.querySelector(`.tag.${tagName}`);
   const isActive = tagElement.classList.contains("active");
 
-  // Toggle UI
   tagElement.classList.toggle("active");
 
-  // Update backend
   fetch(`${API_BASE_URL}/students/${currentStudentId}/tags`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -266,10 +255,9 @@ function toggleTag(tagName) {
       action: isActive ? "remove" : "add",
     }),
   }).catch((error) => {
-    console.log("Tag update simulated (demo mode)");
+    console.error("Tag update error:", error);
   });
 
-  // Update local data
   if (!currentStudentData.tags) currentStudentData.tags = [];
 
   if (isActive) {
@@ -285,12 +273,9 @@ function resetScanner() {
   hideAllSections();
   document.getElementById("scanResult").classList.remove("active");
   document.getElementById("scannerSection").style.display = "block";
-
-  // Clear manual entry
   document.getElementById("manualStudentId").value = "";
   document.getElementById("manualEntry").classList.remove("active");
 
-  // Resume scanning
   if (html5QrCode) {
     html5QrCode.resume();
     isScanning = true;

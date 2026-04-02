@@ -3,16 +3,15 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-const path = require("path");
-
-// Serve frontend
-app.use(express.static(path.join(__dirname, "public")));
+// Serve frontend — go up one level from src/ to find public/
+app.use(express.static(path.join(__dirname, "../public")));
 
 // MongoDB Connection
 mongoose
@@ -101,7 +100,6 @@ app.post("/api/students/:id/attendance", async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Check if already marked today
     const alreadyMarked = student.attendance.some((date) => {
       const d = new Date(date);
       d.setHours(0, 0, 0, 0);
@@ -144,7 +142,7 @@ app.put("/api/students/:id/tags", async (req, res) => {
   }
 });
 
-// Get all students (for admin purposes)
+// Get all students
 app.get("/api/students", async (req, res) => {
   try {
     const { vcsYear, limit = 100, skip = 0 } = req.query;
@@ -180,6 +178,11 @@ app.get("/api/attendance/:date", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+// Fallback — serve index.html for any unknown route
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
 const PORT = process.env.PORT || 3000;
