@@ -87,7 +87,7 @@
                   type="text"
                   id="vcsYear"
                   required
-                  placeholder="e.g., 2025"
+                  placeholder="e.g., 2026"
                   oninput="onYearChange(this.value)"
                 />
               </div>
@@ -109,7 +109,17 @@
                 "
               >
                 No teachers found for this year.
-                <a href="/admin.html" target="_blank" style="color: #667eea"
+                <a
+                  href="#"
+                  onclick="
+                    openAdmin();
+                    return false;
+                  "
+                  style="
+                    color: #667eea;
+                    cursor: pointer;
+                    text-decoration: underline;
+                  "
                   >Add teachers here →</a
                 >
               </p>
@@ -159,10 +169,19 @@
           </div>
 
           <p style="text-align: center; color: #666; margin: 20px 0">
-            Student has been registered and attendance marked for today! 🎉
+            Student registered successfully! 🎉<br />
+            <strong
+              >Please scan the QR code again to mark today's attendance.</strong
+            >
           </p>
 
-          <button class="btn btn-success" onclick="window.location.href = '/'">
+          <button class="btn btn-primary" onclick="window.location.href = '/'">
+            📷 Scan QR to Mark Attendance
+          </button>
+          <button
+            class="btn btn-secondary"
+            onclick="window.location.href = '/'"
+          >
             🔄 Scan Another Student
           </button>
         </div>

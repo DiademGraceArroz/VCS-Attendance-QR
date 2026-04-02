@@ -11,10 +11,70 @@ window.onload = function () {
     }, 2000);
     return;
   }
+
   document.getElementById("newStudentId").textContent = studentId;
+
+  // Restore saved form data if coming back from admin page
+  restoreFormData();
 };
 
-// Load teachers when VCS year is typed
+// Save & Restore form data─
+
+function saveFormData() {
+  const data = {
+    fullName: document.getElementById("fullName").value,
+    age: document.getElementById("age").value,
+    gender: document.getElementById("gender").value,
+    grade: document.getElementById("grade").value,
+    address: document.getElementById("address").value,
+    church: document.getElementById("church").value,
+    vcsYear: document.getElementById("vcsYear").value,
+    teacher: document.getElementById("teacher").value,
+  };
+  sessionStorage.setItem("registerFormData_" + studentId, JSON.stringify(data));
+}
+
+function restoreFormData() {
+  const saved = sessionStorage.getItem("registerFormData_" + studentId);
+  if (!saved) return;
+
+  const data = JSON.parse(saved);
+
+  document.getElementById("fullName").value = data.fullName || "";
+  document.getElementById("age").value = data.age || "";
+  document.getElementById("address").value = data.address || "";
+  document.getElementById("church").value = data.church || "";
+
+  // Restore gender
+  if (data.gender) {
+    document.getElementById("gender").value = data.gender;
+  }
+
+  // Restore grade
+  if (data.grade) {
+    document.getElementById("grade").value = data.grade;
+  }
+
+  // Restore year + reload teachers, then restore selected teacher
+  if (data.vcsYear && data.vcsYear.length === 4) {
+    document.getElementById("vcsYear").value = data.vcsYear;
+    loadTeachers(data.vcsYear, data.teacher);
+  }
+}
+
+function clearFormData() {
+  sessionStorage.removeItem("registerFormData_" + studentId);
+}
+
+// Open admin in new tab, save form data first─
+
+function openAdmin() {
+  saveFormData();
+  window.open("/admin.html", "_blank");
+}
+
+// Teacher loading
+
 let yearTimeout;
 function onYearChange(value) {
   clearTimeout(yearTimeout);
@@ -27,11 +87,10 @@ function onYearChange(value) {
     return;
   }
 
-  // Debounce — wait for user to stop typing
   yearTimeout = setTimeout(() => loadTeachers(value), 500);
 }
 
-function loadTeachers(vcsYear) {
+function loadTeachers(vcsYear, restoreTeacher = null) {
   const teacherSelect = document.getElementById("teacher");
   const hint = document.getElementById("teacherHint");
 
@@ -52,6 +111,11 @@ function loadTeachers(vcsYear) {
           option.textContent = t.name;
           teacherSelect.appendChild(option);
         });
+
+        // Restore previously selected teacher if available
+        if (restoreTeacher) {
+          teacherSelect.value = restoreTeacher;
+        }
       }
     })
     .catch(() => {
@@ -59,6 +123,8 @@ function loadTeachers(vcsYear) {
         '<option value="">Error loading teachers</option>';
     });
 }
+
+// Register─
 
 function registerStudent(event) {
   event.preventDefault();
@@ -74,7 +140,7 @@ function registerStudent(event) {
     church: document.getElementById("church").value,
     vcsYear: document.getElementById("vcsYear").value,
     teacher: document.getElementById("teacher").value,
-    attendance: [new Date().toISOString()],
+    attendance: [],
     tags: [],
   };
 
@@ -91,6 +157,9 @@ function registerStudent(event) {
         return;
       }
 
+      // Clear saved form data on successful registration
+      clearFormData();
+
       // Hide form, show success
       document.getElementById("registrationForm").classList.remove("active");
       document.getElementById("successProfile").classList.add("active");
@@ -103,8 +172,8 @@ function registerStudent(event) {
       document.getElementById("successYear").textContent = studentData.vcsYear;
 
       showStatus(
-        "Student registered successfully! Attendance marked for today.",
-        "success",
+        "Student registered successfully! Please scan the QR again to mark attendance.",
+        "info",
       );
     })
     .catch((error) => {
@@ -113,6 +182,8 @@ function registerStudent(event) {
       console.error("Error:", error);
     });
 }
+
+// Helpers
 
 function showSpinner(show) {
   document.getElementById("spinner").classList.toggle("active", show);
