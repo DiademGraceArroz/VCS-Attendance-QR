@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCS — Student Profile</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📚 VCS Attendance Scanner</h1>
+        <p>Vacation Church School Student Management System</p>
+      </div>
+
+      <div class="content">
+        <!-- Status Messages -->
+        <div id="statusMessage" class="status-message"></div>
+
+        <!-- Loading Spinner -->
+        <div class="spinner" id="spinner"></div>
+
+        <!-- Student Profile -->
+        <div class="student-profile active" id="studentProfile">
+          <div class="profile-header">
+            <h2 id="profileName">Loading...</h2>
+            <span class="attendance-badge" id="attendanceBadge"
+              >Checking...</span
+            >
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Student ID</div>
+              <div class="info-value" id="profileId">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Age</div>
+              <div class="info-value" id="profileAge">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Gender</div>
+              <div class="info-value" id="profileGender">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Grade</div>
+              <div class="info-value" id="profileGrade">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Church/Outreach</div>
+              <div class="info-value" id="profileChurch">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">VCS Year</div>
+              <div class="info-value" id="profileYear">-</div>
+            </div>
+          </div>
+
+          <div class="attendance-history">
+            <h3>📅 Attendance History</h3>
+            <div class="attendance-list" id="attendanceList"></div>
+          </div>
+
+          <div class="tags-section">
+            <h3>🏷️ Character Tags</h3>
+            <p class="tags-hint">Click to toggle tags for this student:</p>
+            <div class="tags-container" id="tagsContainer">
+              <span class="tag creative" onclick="toggleTag('creative')"
+                >🎨 Creative</span
+              >
+              <span class="tag punctual" onclick="toggleTag('punctual')"
+                >⏰ Punctual</span
+              >
+              <span class="tag leader" onclick="toggleTag('leader')"
+                >👑 Leader</span
+              >
+              <span class="tag helpful" onclick="toggleTag('helpful')"
+                >🤝 Helpful</span
+              >
+            </div>
+          </div>
+
+          <button class="btn btn-success" onclick="markAttendance()">
+            ✅ Confirm Today's Attendance
+          </button>
+          <button
+            class="btn btn-secondary"
+            onclick="window.location.href = '/'"
+          >
+            🔄 Scan Another Student
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="profile.js"></script>
+  </body>
+</html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCS — Student Profile</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📚 VCS Attendance Scanner</h1>
+        <p>Vacation Church School Student Management System</p>
+      </div>
+
+      <div class="content">
+        <!-- Status Messages -->
+        <div id="statusMessage" class="status-message"></div>
+
+        <!-- Loading Spinner -->
+        <div class="spinner" id="spinner"></div>
+
+        <!-- Student Profile -->
+        <div class="student-profile active" id="studentProfile">
+          <div class="profile-header">
+            <h2 id="profileName">Loading...</h2>
+            <span class="attendance-badge" id="attendanceBadge"
+              >Checking...</span
+            >
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Student ID</div>
+              <div class="info-value" id="profileId">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Age</div>
+              <div class="info-value" id="profileAge">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Gender</div>
+              <div class="info-value" id="profileGender">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Grade</div>
+              <div class="info-value" id="profileGrade">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Church/Outreach</div>
+              <div class="info-value" id="profileChurch">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">VCS Year</div>
+              <div class="info-value" id="profileYear">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Teacher</div>
+              <div class="info-value" id="profileTeacher">-</div>
+            </div>
+          </div>
+
+          <div class="attendance-history">
+            <h3>📅 Attendance History</h3>
+            <div class="attendance-list" id="attendanceList"></div>
+          </div>
+
+          <div class="tags-section">
+            <h3>🏷️ Character Tags</h3>
+            <p class="tags-hint">Click to toggle tags for this student:</p>
+            <div class="tags-container" id="tagsContainer">
+              <span class="tag creative" onclick="toggleTag('creative')"
+                >🎨 Creative</span
+              >
+              <span class="tag punctual" onclick="toggleTag('punctual')"
+                >⏰ Punctual</span
+              >
+              <span class="tag leader" onclick="toggleTag('leader')"
+                >👑 Leader</span
+              >
+              <span class="tag helpful" onclick="toggleTag('helpful')"
+                >🤝 Helpful</span
+              >
+            </div>
+          </div>
+
+          <button class="btn btn-success" onclick="markAttendance()">
+            ✅ Confirm Today's Attendance
+          </button>
+          <button
+            class="btn btn-secondary"
+            onclick="window.location.href = '/'"
+          >
+            🔄 Scan Another Student
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="profile.js"></script>
+  </body>
+</html>

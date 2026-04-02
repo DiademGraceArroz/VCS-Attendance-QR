@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve frontend — go up one level from src/ to find public/
+// Serve frontend
 app.use(express.static(path.join(__dirname, "../public")));
 
 // MongoDB Connection
@@ -23,7 +23,8 @@ mongoose
     process.exit(1);
   });
 
-// Student Schema
+// ─── Schemas ────────────────────────────────────────────────────────────────
+
 const studentSchema = new mongoose.Schema({
   studentId: { type: String, required: true, unique: true },
   fullName: { type: String, required: true },
@@ -33,14 +34,23 @@ const studentSchema = new mongoose.Schema({
   address: { type: String },
   church: { type: String, required: true },
   vcsYear: { type: String, required: true },
+  teacher: { type: String, required: true },
   attendance: [{ type: Date }],
   tags: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
 });
 
-const Student = mongoose.model("Student", studentSchema);
+// Teacher schema — one document per VCS year
+const teacherSchema = new mongoose.Schema({
+  vcsYear: { type: String, required: true },
+  name: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
 
-// Routes
+const Student = mongoose.model("Student", studentSchema);
+const Teacher = mongoose.model("Teacher", teacherSchema);
+
+// ─── Student Routes ──────────────────────────────────────────────────────────
 
 // Check if student exists
 app.get("/api/students/:id", async (req, res) => {
@@ -68,6 +78,7 @@ app.post("/api/students", async (req, res) => {
       address,
       church,
       vcsYear,
+      teacher,
     } = req.body;
 
     const student = new Student({
@@ -79,6 +90,7 @@ app.post("/api/students", async (req, res) => {
       address,
       church,
       vcsYear,
+      teacher,
     });
 
     await student.save();
@@ -127,9 +139,7 @@ app.put("/api/students/:id/tags", async (req, res) => {
     }
 
     if (action === "add") {
-      if (!student.tags.includes(tag)) {
-        student.tags.push(tag);
-      }
+      if (!student.tags.includes(tag)) student.tags.push(tag);
     } else {
       student.tags = student.tags.filter((t) => t !== tag);
     }
@@ -159,18 +169,13 @@ app.get("/api/students", async (req, res) => {
 app.get("/api/attendance/:date", async (req, res) => {
   try {
     const date = new Date(req.params.date);
-
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
-
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
     const students = await Student.find({
-      attendance: {
-        $gte: startOfDay,
-        $lte: endOfDay,
-      },
+      attendance: { $gte: startOfDay, $lte: endOfDay },
     });
 
     res.json(students);
@@ -179,7 +184,47 @@ app.get("/api/attendance/:date", async (req, res) => {
   }
 });
 
-// Fallback — serve index.html for any unknown route
+// ─── Teacher Routes ──────────────────────────────────────────────────────────
+
+// Get teachers by VCS year
+app.get("/api/teachers", async (req, res) => {
+  try {
+    const { vcsYear } = req.query;
+    const filter = vcsYear ? { vcsYear } : {};
+    const teachers = await Teacher.find(filter).sort({ name: 1 });
+    res.json(teachers);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add a teacher
+app.post("/api/teachers", async (req, res) => {
+  try {
+    const { vcsYear, name } = req.body;
+    if (!vcsYear || !name) {
+      return res.status(400).json({ error: "vcsYear and name are required" });
+    }
+    const teacher = new Teacher({ vcsYear, name });
+    await teacher.save();
+    res.status(201).json({ success: true, teacher });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Delete a teacher
+app.delete("/api/teachers/:id", async (req, res) => {
+  try {
+    await Teacher.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── Fallback ────────────────────────────────────────────────────────────────
+
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });

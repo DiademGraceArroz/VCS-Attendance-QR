@@ -14,13 +14,9 @@
       </div>
 
       <div class="content">
-        <!-- Status Messages -->
         <div id="statusMessage" class="status-message"></div>
-
-        <!-- Loading Spinner -->
         <div class="spinner" id="spinner"></div>
 
-        <!-- Registration Form -->
         <div class="form-section active" id="registrationForm">
           <p class="student-id-display">
             Student ID: <strong id="newStudentId">Loading...</strong>
@@ -91,9 +87,32 @@
                   type="text"
                   id="vcsYear"
                   required
-                  placeholder="e.g., 2026"
+                  placeholder="e.g., 2025"
+                  oninput="onYearChange(this.value)"
                 />
               </div>
+            </div>
+
+            <!-- Teacher Dropdown — loads based on VCS Year -->
+            <div class="form-group">
+              <label for="teacher">Teacher *</label>
+              <select id="teacher" required>
+                <option value="">Enter VCS Year first</option>
+              </select>
+              <p
+                id="teacherHint"
+                style="
+                  color: #999;
+                  font-size: 0.85rem;
+                  margin-top: 6px;
+                  display: none;
+                "
+              >
+                No teachers found for this year.
+                <a href="/admin.html" target="_blank" style="color: #667eea"
+                  >Add teachers here →</a
+                >
+              </p>
             </div>
 
             <button type="submit" class="btn btn-primary">
@@ -109,7 +128,7 @@
           </form>
         </div>
 
-        <!-- Success State (shown after registration) -->
+        <!-- Success State -->
         <div class="student-profile" id="successProfile">
           <div class="profile-header">
             <h2 id="successName">Student Name</h2>
@@ -124,6 +143,10 @@
             <div class="info-item">
               <div class="info-label">Grade</div>
               <div class="info-value" id="successGrade">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Teacher</div>
+              <div class="info-value" id="successTeacher">-</div>
             </div>
             <div class="info-item">
               <div class="info-label">Church/Outreach</div>
