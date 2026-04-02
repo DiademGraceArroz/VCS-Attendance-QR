@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCS Attendance Scanner</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📚 VCS Attendance Scanner</h1>
+        <p>Vacation Church School Student Management System</p>
+      </div>
+
+      <div class="content">
+        <!-- Status Messages -->
+        <div id="statusMessage" class="status-message"></div>
+
+        <!-- Scanner Section -->
+        <div class="scanner-section" id="scannerSection">
+          <div id="reader"></div>
+
+          <div class="scan-result" id="scanResult">
+            <strong>QR Code Detected:</strong> <span id="qrContent"></span>
+          </div>
+
+          <div class="manual-toggle">
+            <p>
+              Camera not working?
+              <span class="toggle-link" onclick="toggleManualEntry()"
+                >Enter Student ID manually</span
+              >
+            </p>
+            <div class="id-input-section" id="manualEntry">
+              <input
+                type="text"
+                id="manualStudentId"
+                placeholder="Enter Student ID (e.g., VCS2024001)"
+              />
+              <button class="btn btn-secondary" onclick="lookupManualId()">
+                Look Up Student
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="spinner" id="spinner"></div>
+
+        <!-- Registration Form (New Student) -->
+        <div class="form-section" id="registrationForm">
+          <h2 class="section-title">📝 New Student Registration</h2>
+          <p class="student-id-display">
+            Student ID: <strong id="newStudentId"></strong>
+          </p>
+
+          <form id="studentForm" onsubmit="registerStudent(event)">
+            <div class="form-group">
+              <label for="fullName">Full Name *</label>
+              <input
+                type="text"
+                id="fullName"
+                required
+                placeholder="Enter full name"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="age">Age *</label>
+                <input
+                  type="number"
+                  id="age"
+                  required
+                  min="3"
+                  max="25"
+                  placeholder="Age"
+                />
+              </div>
+              <div class="form-group">
+                <label for="gender">Gender *</label>
+                <select id="gender" required>
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="grade">Grade/Class *</label>
+              <input
+                type="text"
+                id="grade"
+                required
+                placeholder="e.g., Grade 5, Primary 3"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="address">Address</label>
+              <input type="text" id="address" placeholder="Enter address" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="church">Church/Outreach *</label>
+                <input
+                  type="text"
+                  id="church"
+                  required
+                  placeholder="Church name or Outreach location"
+                />
+              </div>
+              <div class="form-group">
+                <label for="vcsYear">VCS Year *</label>
+                <input
+                  type="text"
+                  id="vcsYear"
+                  required
+                  placeholder="e.g., 2024"
+                />
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              Register Student
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="resetScanner()"
+            >
+              Cancel
+            </button>
+          </form>
+        </div>
+
+        <!-- Student Profile (Existing Student) -->
+        <div class="student-profile" id="studentProfile">
+          <div class="profile-header">
+            <h2 id="profileName">Student Name</h2>
+            <span class="attendance-badge" id="attendanceBadge"
+              >Present Today</span
+            >
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Student ID</div>
+              <div class="info-value" id="profileId">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Age</div>
+              <div class="info-value" id="profileAge">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Gender</div>
+              <div class="info-value" id="profileGender">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Grade</div>
+              <div class="info-value" id="profileGrade">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Church/Outreach</div>
+              <div class="info-value" id="profileChurch">-</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">VCS Year</div>
+              <div class="info-value" id="profileYear">-</div>
+            </div>
+          </div>
+
+          <div class="attendance-history">
+            <h3>📅 Attendance History</h3>
+            <div class="attendance-list" id="attendanceList"></div>
+          </div>
+
+          <div class="tags-section">
+            <h3>🏷️ Character Tags</h3>
+            <p class="tags-hint">Click to toggle tags for this student:</p>
+            <div class="tags-container" id="tagsContainer">
+              <span class="tag creative" onclick="toggleTag('creative')"
+                >🎨 Creative</span
+              >
+              <span class="tag punctual" onclick="toggleTag('punctual')"
+                >⏰ Punctual</span
+              >
+              <span class="tag leader" onclick="toggleTag('leader')"
+                >👑 Leader</span
+              >
+              <span class="tag helpful" onclick="toggleTag('helpful')"
+                >🤝 Helpful</span
+              >
+            </div>
+          </div>
+
+          <button class="btn btn-success" onclick="markAttendance()">
+            ✅ Confirm Today's Attendance
+          </button>
+          <button class="btn btn-secondary" onclick="resetScanner()">
+            🔄 Scan Another Student
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
