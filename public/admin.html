@@ -74,6 +74,61 @@
         margin-bottom: 15px;
         color: #333;
       }
+      #loginScreen {
+        display: none;
+        max-width: 360px;
+        margin: 40px auto;
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      #loginScreen h2 {
+        margin-bottom: 8px;
+        color: #333;
+      }
+      #loginScreen p {
+        color: #999;
+        margin-bottom: 24px;
+        font-size: 0.9rem;
+      }
+      #passwordInput {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        margin-bottom: 12px;
+        text-align: center;
+        letter-spacing: 2px;
+      }
+      #passwordInput:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+      #loginError {
+        display: none;
+        color: #721c24;
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+      }
+      .logout-btn {
+        background: none;
+        border: none;
+        color: #999;
+        font-size: 0.85rem;
+        cursor: pointer;
+        text-decoration: underline;
+        float: right;
+      }
+      .logout-btn:hover {
+        color: #ff6b6b;
+      }
     </style>
   </head>
   <body>
@@ -84,71 +139,184 @@
       </div>
 
       <div class="content">
-        <div id="statusMessage" class="status-message"></div>
-        <div class="spinner" id="spinner"></div>
-
-        <!-- Add Teacher Form -->
-        <div class="add-form">
-          <h3>➕ Add Teacher</h3>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="newYear">VCS Year *</label>
-              <input
-                type="text"
-                id="newYear"
-                placeholder="e.g., 2026"
-                maxlength="4"
-              />
-            </div>
-            <div class="form-group">
-              <label for="newName">Teacher Name *</label>
-              <input
-                type="text"
-                id="newName"
-                placeholder="e.g., Teacher Maria"
-              />
-            </div>
-          </div>
-          <button class="btn btn-primary" onclick="addTeacher()">
-            Add Teacher
-          </button>
-        </div>
-
-        <!-- Filter by Year -->
-        <div class="year-filter">
+        <!-- Login Screen -->
+        <div id="loginScreen">
+          <h2>🔒 Admin Access</h2>
+          <p>Enter the admin password to continue</p>
+          <div id="loginError">Wrong password. Please try again.</div>
           <input
-            type="text"
-            id="filterYear"
-            placeholder="Filter by year (e.g., 2026)"
-            maxlength="4"
-            oninput="loadTeachers(this.value)"
+            type="password"
+            id="passwordInput"
+            placeholder="Enter password"
           />
+          <button class="btn btn-primary" onclick="submitPassword()">
+            Unlock Admin
+          </button>
+          <br />
           <button
             class="btn btn-secondary"
-            style="width: auto; margin: 0"
-            onclick="loadTeachers('')"
+            id="loginBackBtn"
+            style="margin-top: 10px"
           >
-            Show All
+            ← Back
           </button>
         </div>
 
-        <!-- Teacher List -->
-        <div class="teacher-list" id="teacherList">
-          <div class="empty-state">Enter a year above or click "Show All"</div>
-        </div>
+        <!-- Admin Content -->
+        <div id="adminContent" style="display: none">
+          <div style="overflow: hidden; margin-bottom: 10px">
+            <button class="logout-btn" onclick="logout()">🔓 Logout</button>
+          </div>
 
-        <button
-          class="btn btn-secondary"
-          onclick="window.location.href = '/'"
-          style="margin-top: 20px"
-        >
-          ← Back to Scanner
-        </button>
+          <div id="statusMessage" class="status-message"></div>
+          <div class="spinner" id="spinner"></div>
+
+          <!-- Add Teacher Form -->
+          <div class="add-form">
+            <h3>➕ Add Teacher</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="newYear">VCS Year *</label>
+                <input
+                  type="text"
+                  id="newYear"
+                  placeholder="e.g., 2026"
+                  maxlength="4"
+                />
+              </div>
+              <div class="form-group">
+                <label for="newName">Teacher Name *</label>
+                <input
+                  type="text"
+                  id="newName"
+                  placeholder="e.g., Teacher Maria"
+                />
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="addTeacher()">
+              Add Teacher
+            </button>
+          </div>
+
+          <!-- Filter by Year -->
+          <div class="year-filter">
+            <input
+              type="text"
+              id="filterYear"
+              placeholder="Filter by year (e.g., 2026)"
+              maxlength="4"
+              oninput="loadTeachers(this.value)"
+            />
+            <button
+              class="btn btn-secondary"
+              style="width: auto; margin: 0"
+              onclick="loadTeachers('')"
+            >
+              Show All
+            </button>
+          </div>
+
+          <!-- Teacher List -->
+          <div class="teacher-list" id="teacherList">
+            <div class="empty-state">
+              Enter a year above or click "Show All"
+            </div>
+          </div>
+
+          <button
+            class="btn btn-secondary"
+            id="adminBackBtn"
+            style="margin-top: 20px"
+          >
+            ← Back to Registration
+          </button>
+        </div>
       </div>
     </div>
 
     <script>
       const API_BASE_URL = "/api";
+      const ADMIN_PASSWORD = "vcs2026admin"; // ← change this to your own password
+
+      // Read returnTo param — if opened from registration, go back there
+      const urlParams = new URLSearchParams(window.location.search);
+      const returnTo = urlParams.get("returnTo");
+      const backUrl = returnTo
+        ? `/register.html?id=${encodeURIComponent(returnTo)}`
+        : "/";
+
+      // ─── Auth ───────────────────────────────────────────────────────────────
+
+      function checkAuth() {
+        return sessionStorage.getItem("adminAuth") === ADMIN_PASSWORD;
+      }
+
+      function showLoginScreen() {
+        document.getElementById("adminContent").style.display = "none";
+        document.getElementById("loginScreen").style.display = "block";
+      }
+
+      function showAdminContent() {
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("adminContent").style.display = "block";
+        loadTeachers("");
+      }
+
+      function submitPassword() {
+        const entered = document.getElementById("passwordInput").value;
+        if (entered === ADMIN_PASSWORD) {
+          sessionStorage.setItem("adminAuth", ADMIN_PASSWORD);
+          document.getElementById("loginError").style.display = "none";
+          showAdminContent();
+        } else {
+          document.getElementById("loginError").style.display = "block";
+          document.getElementById("passwordInput").value = "";
+          document.getElementById("passwordInput").focus();
+        }
+      }
+
+      function logout() {
+        sessionStorage.removeItem("adminAuth");
+        showLoginScreen();
+      }
+
+      // ─── Init ────────────────────────────────────────────────────────────────
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Wire up back buttons dynamically using backUrl
+        document.getElementById("loginBackBtn").onclick = () =>
+          (window.location.href = backUrl);
+        document.getElementById("adminBackBtn").onclick = () =>
+          (window.location.href = backUrl);
+
+        // Allow Enter key on password input
+        document
+          .getElementById("passwordInput")
+          .addEventListener("keydown", function (e) {
+            if (e.key === "Enter") submitPassword();
+          });
+
+        // Update back button label based on where we came from
+        if (returnTo) {
+          document.getElementById("adminBackBtn").textContent =
+            "← Back to Registration";
+          document.getElementById("loginBackBtn").textContent =
+            "← Back to Registration";
+        } else {
+          document.getElementById("adminBackBtn").textContent =
+            "← Back to Scanner";
+          document.getElementById("loginBackBtn").textContent =
+            "← Back to Scanner";
+        }
+
+        if (checkAuth()) {
+          showAdminContent();
+        } else {
+          showLoginScreen();
+        }
+      });
+
+      // ─── Teachers ────────────────────────────────────────────────────────────
 
       function loadTeachers(vcsYear) {
         const url = vcsYear

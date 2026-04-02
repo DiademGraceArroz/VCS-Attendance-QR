@@ -18,7 +18,7 @@ window.onload = function () {
   restoreFormData();
 };
 
-// Save & Restore form data─
+// Save & Restore form data
 
 function saveFormData() {
   const data = {
@@ -66,14 +66,17 @@ function clearFormData() {
   sessionStorage.removeItem("registerFormData_" + studentId);
 }
 
-// Open admin in new tab, save form data first─
+// Open admin in new tab, save form data first
 
 function openAdmin() {
   saveFormData();
-  window.open("/admin.html", "_blank");
+  window.open(
+    `/admin.html?returnTo=${encodeURIComponent(studentId)}`,
+    "_blank",
+  );
 }
 
-// Teacher loading
+// Teacher loading─
 
 let yearTimeout;
 function onYearChange(value) {
@@ -124,7 +127,7 @@ function loadTeachers(vcsYear, restoreTeacher = null) {
     });
 }
 
-// Register─
+// Register
 
 function registerStudent(event) {
   event.preventDefault();
@@ -183,7 +186,7 @@ function registerStudent(event) {
     });
 }
 
-// Helpers
+// Helpers─
 
 function showSpinner(show) {
   document.getElementById("spinner").classList.toggle("active", show);
