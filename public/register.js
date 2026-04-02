@@ -1,6 +1,6 @@
 const API_BASE_URL = "/api";
 
-// Read student ID from URL query param: /register.html?id=VCS2025001
+// Read student ID from URL query param: /register.html?id=VCS2026001
 const params = new URLSearchParams(window.location.search);
 const studentId = params.get("id");
 
