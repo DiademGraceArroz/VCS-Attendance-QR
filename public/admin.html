@@ -135,7 +135,7 @@
     <div class="container">
       <div class="header">
         <h1>⚙️ Admin Panel</h1>
-        <p>Manage Teachers per VCS Year</p>
+        <p>VCS Teacher Management</p>
       </div>
 
       <div class="content">
@@ -173,7 +173,7 @@
 
           <!-- Add Teacher Form -->
           <div class="add-form">
-            <h3>➕ Add Teacher</h3>
+            <h3>Add Teacher</h3>
             <div class="form-row">
               <div class="form-group">
                 <label for="newYear">VCS Year *</label>
@@ -245,7 +245,7 @@
         ? `/register.html?id=${encodeURIComponent(returnTo)}`
         : "/";
 
-      // ─── Auth ───────────────────────────────────────────────────────────────
+      // Auth
 
       function checkAuth() {
         return sessionStorage.getItem("adminAuth") === ADMIN_PASSWORD;
@@ -280,7 +280,7 @@
         showLoginScreen();
       }
 
-      // ─── Init ────────────────────────────────────────────────────────────────
+      // Init
 
       document.addEventListener("DOMContentLoaded", function () {
         // Wire up back buttons dynamically using backUrl
@@ -316,7 +316,7 @@
         }
       });
 
-      // ─── Teachers ────────────────────────────────────────────────────────────
+      // Teachers
 
       function loadTeachers(vcsYear) {
         const url = vcsYear
